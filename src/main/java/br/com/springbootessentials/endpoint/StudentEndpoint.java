@@ -3,6 +3,7 @@ package br.com.springbootessentials.endpoint;
 import static java.util.Arrays.asList;
 
 import br.com.springbootessentials.error.CustomErrorType;
+import br.com.springbootessentials.error.ResourceNotFoundException;
 import br.com.springbootessentials.model.Student;
 import br.com.springbootessentials.repository.StudentRepository;
 import br.com.springbootessentials.util.DateUtil;
@@ -38,11 +39,8 @@ public class StudentEndpoint {
 
   @GetMapping(path = "/{id}")
   public ResponseEntity<?> getStudentById(@PathVariable("id") Long id) {
+    verifyIfStudentExists(id);
     Student student = studentDAO.findById(id).get();
-
-   if (student == null) {
-      return new ResponseEntity<>(new CustomErrorType("Student not found"), HttpStatus.NOT_FOUND);
-    }
     return new ResponseEntity<>(student, HttpStatus.OK);
   }
 
@@ -58,13 +56,21 @@ public class StudentEndpoint {
 
   @DeleteMapping(path = "/{id}")
   public ResponseEntity<?> delete(@PathVariable Long id) {
+    verifyIfStudentExists(id);
     studentDAO.deleteById(id);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
   @PutMapping
   public ResponseEntity<?> update(@RequestBody Student student) {
+    verifyIfStudentExists(student.getId());
     studentDAO.save(student);
     return new ResponseEntity<>(HttpStatus.OK);
+  }
+
+  private void verifyIfStudentExists(Long id){
+    if (!studentDAO.findById(id).isPresent()){
+      throw new ResourceNotFoundException("Student not found for ID: "+id);
+    }
   }
 }
