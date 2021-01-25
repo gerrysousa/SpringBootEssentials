@@ -2,15 +2,13 @@ package br.com.springbootessentials.endpoint;
 
 import static java.util.Arrays.asList;
 
-import br.com.springbootessentials.error.CustomErrorType;
+
 import br.com.springbootessentials.error.ResourceNotFoundException;
 import br.com.springbootessentials.model.Student;
 import br.com.springbootessentials.repository.StudentRepository;
-import br.com.springbootessentials.util.DateUtil;
-import java.time.LocalDateTime;
-import java.util.List;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,8 +32,8 @@ public class StudentEndpoint {
   }
 
   @GetMapping
-  public ResponseEntity<?> listAll() {
-    return new ResponseEntity<>(studentDAO.findAll(), HttpStatus.OK);
+  public ResponseEntity<?> listAll(Pageable pageable) {
+    return new ResponseEntity<>(studentDAO.findAll(pageable), HttpStatus.OK);
   }
 
   @GetMapping(path = "/{id}")
