@@ -1,8 +1,5 @@
 package br.com.springbootessentials.endpoint;
 
-import static java.util.Arrays.asList;
-
-
 import br.com.springbootessentials.error.ResourceNotFoundException;
 import br.com.springbootessentials.model.Student;
 import br.com.springbootessentials.repository.StudentRepository;
@@ -25,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("students")
+@RequestMapping("v1")
 public class StudentEndpoint {
   private final StudentRepository studentDAO;
 
@@ -34,49 +31,49 @@ public class StudentEndpoint {
     this.studentDAO = studentDAO;
   }
 
-  @GetMapping
+  @GetMapping(path = "protected/students")
   public ResponseEntity<?> listAll(Pageable pageable) {
     return new ResponseEntity<>(studentDAO.findAll(pageable), HttpStatus.OK);
   }
 
-  @GetMapping(path = "/{id}")
-  public ResponseEntity<?> getStudentById(@PathVariable("id") Long id,
-                      @AuthenticationPrincipal UserDetails userDetails) {
+  @GetMapping(path = "protected/students/{id}")
+  public ResponseEntity<?> getStudentById(
+      @PathVariable("id") Long id, @AuthenticationPrincipal UserDetails userDetails) {
     System.out.println(userDetails);
     verifyIfStudentExists(id);
     Student student = studentDAO.findById(id).get();
     return new ResponseEntity<>(student, HttpStatus.OK);
   }
 
-  @GetMapping(path = "/findByName/{name}")
+  @GetMapping(path = "protected/students/findByName/{name}")
   public ResponseEntity<?> getStudentByName(@PathVariable String name) {
-      return new ResponseEntity<>(studentDAO.findByNameIgnoreCaseContaining(name), HttpStatus.OK);
+    return new ResponseEntity<>(studentDAO.findByNameIgnoreCaseContaining(name), HttpStatus.OK);
   }
 
-  @PostMapping
+  @PostMapping(path = "admin/students")
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<?> save(@Valid @RequestBody Student student) {
-       return new ResponseEntity<>(studentDAO.save(student), HttpStatus.CREATED);
+    return new ResponseEntity<>(studentDAO.save(student), HttpStatus.CREATED);
   }
 
-  @DeleteMapping(path = "/{id}")
- @PreAuthorize("hasRole('ADMIN')")
+  @DeleteMapping(path = "admin/students/{id}")
+  // @PreAuthorize("hasRole('ADMIN')")
   public ResponseEntity<?> delete(@PathVariable Long id) {
     verifyIfStudentExists(id);
     studentDAO.deleteById(id);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
-  @PutMapping
+  @PutMapping(path = "admin/students")
   public ResponseEntity<?> update(@RequestBody Student student) {
     verifyIfStudentExists(student.getId());
     studentDAO.save(student);
     return new ResponseEntity<>(HttpStatus.OK);
   }
 
-  private void verifyIfStudentExists(Long id){
-    if (!studentDAO.findById(id).isPresent()){
-      throw new ResourceNotFoundException("Student not found for ID: "+id);
+  private void verifyIfStudentExists(Long id) {
+    if (!studentDAO.findById(id).isPresent()) {
+      throw new ResourceNotFoundException("Student not found for ID: " + id);
     }
   }
 }
