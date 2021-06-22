@@ -1,5 +1,6 @@
 package br.com.springbootessentials.javaclient;
 
+import br.com.springbootessentials.handler.RestResponseExceptionHandler;
 import br.com.springbootessentials.model.PageableResponse;
 import br.com.springbootessentials.model.Student;
 import java.util.List;
@@ -17,11 +18,13 @@ public class JavaClientDAO {
       new RestTemplateBuilder()
           .rootUri("http://localhost:8080/v1/protected/students")
           .basicAuthentication("user01", "123456")
+          .errorHandler(new RestResponseExceptionHandler())
           .build();
   private RestTemplate restTemplateAdmin =
       new RestTemplateBuilder()
           .rootUri("http://localhost:8080/v1/admin/students")
           .basicAuthentication("admin", "123456")
+          .errorHandler(new RestResponseExceptionHandler())
           .build();
 
   public Student findById(long id) {
@@ -44,6 +47,14 @@ public class JavaClientDAO {
             "/", HttpMethod.POST, new HttpEntity<>(student, createJSONHeaders()), Student.class);
 
     return exchangePost.getBody();
+  }
+
+  public void update(Student student){
+    restTemplateAdmin.put("/", student);
+  }
+
+  public void delete(long id){
+    restTemplateAdmin.delete("/{id}", id);
   }
 
   private static HttpHeaders createJSONHeaders() {
