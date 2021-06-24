@@ -3,15 +3,24 @@ package br.com.springbootessentials.model;
 import javax.persistence.Entity;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 
 @Entity
 public class Student extends AbstractEntity{
-  @NotEmpty(message = "O campo nome do estudante é obrigatório!")
+  @NotEmpty(message = "Field 'name' is mandatory!")
   private  String name;
-  @NotEmpty
-  @Email
+  @NotEmpty(message = "Field 'email' is mandatory!")
+  @Email(message = "Email must be valid!")
   private String email;
+
+  public Student(String name, @NotEmpty @Email String email) {
+    this.name = name;
+    this.email = email;
+  }
+
+  public Student() {
+  }
 
   public String getName() {
     return name;
@@ -28,4 +37,5 @@ public class Student extends AbstractEntity{
   public void setEmail(String email) {
     this.email = email;
   }
+
 }
