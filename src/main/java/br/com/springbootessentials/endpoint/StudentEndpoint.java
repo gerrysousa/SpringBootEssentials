@@ -21,7 +21,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.*;
 
+
+import javax.validation.Valid;
+import java.util.Optional;
 @RestController
 @RequestMapping("v1")
 public class StudentEndpoint {
@@ -33,11 +37,23 @@ public class StudentEndpoint {
   }
 
   @GetMapping(path = "protected/students")
+  @ApiOperation(value = "Return a list with all students", response = Student[].class, produces = "application/json")
+  @ApiImplicitParams({
+      @ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+          value = "Results page you want to retrieve (0..N)"),
+      @ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+          value = "Number of records per page."),
+      @ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+          value = "Sorting criteria in the format: property(asc|desc). " +
+              "Default sort order is ascending. " +
+              "Multiple sort criteria are supported.")
+  })
   public ResponseEntity<?> listAll(Pageable pageable) {
     return new ResponseEntity<>(studentDAO.findAll(pageable), HttpStatus.OK);
   }
 
   @GetMapping(path = "protected/students/{id}")
+  @ApiOperation(value = "Return student by given id", response = Student.class)
   public ResponseEntity<?> getStudentById(
       @PathVariable("id") Long id, Authentication authentication) {
     System.out.println(authentication);
@@ -47,12 +63,14 @@ public class StudentEndpoint {
   }
 
   @GetMapping(path = "protected/students/findByName/{name}")
+  @ApiOperation(value = "Return student by given name", response = Student.class)
   public ResponseEntity<?> getStudentByName(@PathVariable String name) {
     return new ResponseEntity<>(studentDAO.findByNameIgnoreCaseContaining(name), HttpStatus.OK);
   }
 
   @PostMapping(path = "admin/students")
   @Transactional(rollbackFor = Exception.class)
+  @ApiOperation(value = "Save given student", response = Student.class, produces="application/json", consumes="application/json")
   public ResponseEntity<?> save(@Valid @RequestBody Student student) {
     return new ResponseEntity<>(studentDAO.save(student), HttpStatus.CREATED);
   }

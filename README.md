@@ -54,3 +54,6 @@ Run systemctl command:
 And start the service again:
 
 ```sudo service spring-essentials start```
+
+-------------------
+Run the application, you can see the Swagger in the follow URL: http://localhost:8080/swagger-ui.html
