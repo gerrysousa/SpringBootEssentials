@@ -1,8 +1,8 @@
 package br.com.springbootessentials.repository;
 
-import br.com.springbootessentials.model.User;
+import br.com.springbootessentials.model.DBUser;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface UserRepository extends PagingAndSortingRepository<User, Long> {
-  User findByUsername(String username);
+public interface UserRepository extends PagingAndSortingRepository<DBUser, Long> {
+  DBUser findByUsername(String username);
 }

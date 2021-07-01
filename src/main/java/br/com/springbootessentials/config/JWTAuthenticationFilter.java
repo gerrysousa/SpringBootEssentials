@@ -1,7 +1,7 @@
 package br.com.springbootessentials.config;
 
 import static br.com.springbootessentials.config.SecurityConstants.*;
-import br.com.springbootessentials.model.User;
+import br.com.springbootessentials.model.DBUser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -16,8 +16,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
+  @Autowired
+  @Qualifier("authenticationManagerBean")
   private AuthenticationManager authenticationManager;
 
   public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
@@ -28,9 +33,13 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   public Authentication attemptAuthentication(
       HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
     try {
-      User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
+      System.out.println("parametro " + request.getParameter("username"));
+
+      DBUser DBUser = new ObjectMapper().readValue(request.getInputStream(), DBUser.class);
+      System.out.println("JWTAuthenticationFilter " + DBUser.getUsername() + DBUser.getPassword());
+      System.out.println("new UsernamePasswordAuthenticationToken(DBUser.getUsername(), DBUser.getPassword()) "+ new UsernamePasswordAuthenticationToken(DBUser.getUsername(), DBUser.getPassword()));
       return this.authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+          new UsernamePasswordAuthenticationToken(DBUser.getUsername(), DBUser.getPassword()));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -53,7 +62,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             .signWith(SignatureAlgorithm.HS512, SECRET)
             .compact();
     String bearerToken = TOKEN_PREFIX+token;
-    response.getWriter().write(bearerToken);
-    response.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+    response.getWriter().write(bearerToken); // coloca o token no body pra facilitar a vida do frontend
+    response.addHeader(HEADER_STRING, bearerToken);
   }
 }
+

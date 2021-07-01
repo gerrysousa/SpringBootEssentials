@@ -32,11 +32,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
-        .and().csrf().disable().authorizeRequests().antMatchers(HttpMethod.GET,SIGN_UP_URL).permitAll()
-        .antMatchers("/*/protected/**")
-        .hasAnyRole("USER")
-        .antMatchers("/*/admin/**")
-        .hasAnyRole("ADMIN")
+        //permitDefaultValues libera os endpoitns pra serem acessados atraves do navegador usando javascript. Caso eu na ofaca isso, o esquema de seguranca vai ficar travando requisicoes
+        //de navegadores
+        .and().csrf().disable().authorizeRequests().antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
+        .antMatchers("/*/protected/**").hasRole("USER")
+        .antMatchers("/*/admin/**").hasRole("ADMIN")
         .and()
         .addFilter(new JWTAuthenticationFilter(authenticationManager()))
         .addFilter(new JWTAuthorizationFilter(authenticationManager(), customUserDetailsService));

@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
 
 @Entity
-public class User extends AbstractEntity{
+public class DBUser extends AbstractEntity{
   @NotEmpty
   @Column(unique = true)
   private String username;
@@ -16,6 +16,16 @@ public class User extends AbstractEntity{
   private String name;
   @NotEmpty
   private boolean admin;
+
+  public DBUser (@NotEmpty String username, @NotEmpty String password, @NotEmpty String name, @NotEmpty boolean admin) {
+    this.username = username;
+    this.password = password;
+    this.name = name;
+    this.admin = admin;
+  }
+
+  public DBUser () {
+  }
 
   public String getUsername() {
     return username;

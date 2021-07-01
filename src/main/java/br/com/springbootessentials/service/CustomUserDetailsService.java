@@ -1,6 +1,6 @@
 package br.com.springbootessentials.service;
 
-import br.com.springbootessentials.model.User;
+import br.com.springbootessentials.model.DBUser;
 import br.com.springbootessentials.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
@@ -23,10 +23,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
-    User user = Optional.ofNullable(userRepository.findByUsername(username)).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    DBUser DBUser = Optional.ofNullable(userRepository.findByUsername(username)).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     List<GrantedAuthority> authorityListAdmin = AuthorityUtils.createAuthorityList("ROLE_USER","ROLE_ADMIN");
     List<GrantedAuthority> authorityListUser = AuthorityUtils.createAuthorityList("ROLE_USER");
 
-    return new org.springframework.security.core.userdetails.User(user.getUsername(),user.getPassword(), user.isAdmin() ? authorityListAdmin : authorityListUser);
+    return new org.springframework.security.core.userdetails.User(DBUser.getUsername(), DBUser.getPassword(), DBUser.isAdmin() ? authorityListAdmin : authorityListUser);
   }
 }
