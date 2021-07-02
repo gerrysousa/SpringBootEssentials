@@ -4,6 +4,8 @@ import static br.com.springbootessentials.config.SecurityConstants.*;
 
 import br.com.springbootessentials.service.CustomUserDetailsService;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Date;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,5 +54,20 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         .getSubject();
     UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
     return username != null ? new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()) : null;
+  }
+
+  public static void addAuthentication(HttpServletResponse res, String username) {
+
+    String jwt = createToken(username);
+
+    res.addHeader(HEADER_STRING, TOKEN_PREFIX + " " + jwt);
+  }
+  public static String createToken(String username) {
+    String jwt = Jwts.builder()
+        .setSubject(username)
+        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+        .signWith(SignatureAlgorithm.HS512, SECRET)
+        .compact();
+    return jwt;
   }
 }

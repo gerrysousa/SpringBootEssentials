@@ -1,19 +1,23 @@
 package br.com.springbootessentials;
 
+import br.com.springbootessentials.config.JWTAuthorizationFilter;
 import br.com.springbootessentials.model.Student;
 import br.com.springbootessentials.repository.StudentRepository;
 import br.com.springbootessentials.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +31,8 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +49,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 public class StudentEndpointTokenTest {
+  @LocalServerPort
+  private int port;
 
   @Autowired
   private TestRestTemplate restTemplate;
@@ -59,21 +67,39 @@ public class StudentEndpointTokenTest {
   private UserRepository userRepository;
 
   private HttpEntity<Void> protectedHeader;
-  private HttpEntity<Student> adminHeader;
+  private HttpEntity<Void> adminHeader;
   private HttpEntity<Void> wrongHeader;
 
   @BeforeEach
   public void configProtectedHeaders() {
-    String str = "{\"username\":\"user01\",\"password\":\"123456\"}";
-    HttpHeaders headers = restTemplate.postForEntity("/login", str, String.class).getHeaders();
+//    String str = "{\"username\":\"user01\",\"password\":\"123456\"}";
+//    HttpHeaders headers = restTemplate.postForEntity("/login", str, String.class).getHeaders();
+//    this.protectedHeader = new HttpEntity<>(headers);
+
+    String token = JWTAuthorizationFilter.createToken("user01");
+    //   HttpHeaders headers = restTemplate.postForEntity("/login", str, String.class).getHeaders();
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Authorization", "Bearer "+token);
+    headers.add("Content-Type","application/json");
     this.protectedHeader = new HttpEntity<>(headers);
+
+    System.out.println(headers);
   }
 
   @BeforeEach
   public void configAdminHeaders() {
-    String str = "{\"username\":\"admin\",\"password\":\"123456\"}";
-    HttpHeaders headers = restTemplate.postForEntity("/login", str, String.class).getHeaders();
+//    String str = "{\"username\":\"admin\",\"password\":\"123456\"}";
+//    HttpHeaders headers = restTemplate.postForEntity("/login", str, String.class).getHeaders();
+//    this.adminHeader = new HttpEntity<>(headers);
+
+    String token = JWTAuthorizationFilter.createToken("admin");
+    //   HttpHeaders headers = restTemplate.postForEntity("/login", str, String.class).getHeaders();
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Authorization", "Bearer "+token);
+    headers.add("Content-Type","application/json");
     this.adminHeader = new HttpEntity<>(headers);
+    System.out.println(headers);
+
   }
 
   @BeforeEach
